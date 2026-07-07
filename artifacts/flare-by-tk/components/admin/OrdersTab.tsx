@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { Bike, Check, MessageCircle, RefreshCw } from "lucide-react";
 import { rs } from "./types";
+import { fillTemplate, waLink, TEMPLATE_KEYS } from "@/lib/whatsapp";
+import type { Rider } from "./RidersTab";
 
 interface OrderItem {
   id: number;
@@ -23,8 +25,26 @@ interface Order {
   coupon_code: string | null;
   discount_amount: string | null;
   special_instructions: string | null;
+  pos_number: string | null;
+  rider_id: number | null;
+  rider_name: string | null;
+  rider_phone: string | null;
   items: OrderItem[];
   created_at: string;
+}
+
+function buildMessage(template: string, order: Order): string {
+  const itemsText = (order.items ?? [])
+    .map((i) => `${i.qty} × ${i.name} — ${rs(i.price * i.qty)}`)
+    .join("\n");
+  return fillTemplate(template, {
+    customer_name: order.customer_name,
+    order_no: order.pos_number || String(order.id),
+    items: itemsText,
+    total: rs(order.total_amount),
+    rider_name: order.rider_name ?? "",
+    rider_phone: order.rider_phone ?? "",
+  });
 }
 
 const STATUSES = ["new", "preparing", "ready", "delivered", "cancelled"];
@@ -49,6 +69,9 @@ export default function OrdersTab({
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<Filter>("current");
+  const [riders, setRiders] = useState<Rider[]>([]);
+  const [templates, setTemplates] = useState<Record<string, string>>({});
+  const [posDrafts, setPosDrafts] = useState<Record<number, string>>({});
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
@@ -66,19 +89,57 @@ export default function OrdersTab({
 
   useEffect(() => {
     loadOrders();
+    (async () => {
+      const [rRes, sRes] = await Promise.all([
+        fetch("/api/riders"),
+        fetch("/api/settings"),
+      ]);
+      if (rRes.status === 401 || sRes.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      if (rRes.ok) setRiders(await rRes.json());
+      if (sRes.ok) setTemplates(await sRes.json());
+    })();
   }, [loadOrders]);
 
-  async function updateStatus(id: number, status: string) {
+  async function patchOrder(id: number, patch: Record<string, unknown>) {
     const res = await fetch(`/api/orders/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(patch),
     });
+    if (res.status === 401) return onUnauthorized();
     if (res.ok) {
+      const updated = await res.json();
       setOrders((prev) =>
-        prev.map((o) => (o.id === id ? { ...o, status } : o)),
+        prev.map((o) => {
+          if (o.id !== id) return o;
+          const rider =
+            "rider_id" in patch
+              ? riders.find((r) => r.id === updated.rider_id)
+              : null;
+          return {
+            ...o,
+            ...("status" in patch ? { status: updated.status } : {}),
+            ...("pos_number" in patch
+              ? { pos_number: updated.pos_number }
+              : {}),
+            ...("rider_id" in patch
+              ? {
+                  rider_id: updated.rider_id,
+                  rider_name: rider?.name ?? null,
+                  rider_phone: rider?.phone ?? null,
+                }
+              : {}),
+          };
+        }),
       );
     }
+  }
+
+  function updateStatus(id: number, status: string) {
+    return patchOrder(id, { status });
   }
 
   const filtered = orders.filter((o) =>
@@ -198,6 +259,128 @@ export default function OrdersTab({
                 {(order.items ?? [])
                   .map((i) => `${i.qty} × ${i.name}`)
                   .join(" · ")}
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-zinc-800 pt-3">
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor={`pos-${order.id}`}
+                    className="text-xs font-semibold uppercase tracking-wide text-zinc-500"
+                  >
+                    POS #
+                  </label>
+                  <input
+                    id={`pos-${order.id}`}
+                    value={posDrafts[order.id] ?? order.pos_number ?? ""}
+                    onChange={(e) =>
+                      setPosDrafts((prev) => ({
+                        ...prev,
+                        [order.id]: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g. 12345"
+                    className="w-28 rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-[#ff6b1a]"
+                  />
+                  {(posDrafts[order.id] ?? order.pos_number ?? "") !==
+                    (order.pos_number ?? "") && (
+                    <button
+                      onClick={() =>
+                        patchOrder(order.id, {
+                          pos_number: posDrafts[order.id] ?? "",
+                        })
+                      }
+                      className="flex items-center gap-1 rounded-lg bg-[#ff6b1a] px-2.5 py-1.5 text-xs font-semibold text-black"
+                    >
+                      <Check className="h-3.5 w-3.5" /> Save
+                    </button>
+                  )}
+                </div>
+
+                {order.order_type === "delivery" && (
+                  <div className="flex items-center gap-2">
+                    <Bike className="h-4 w-4 text-zinc-500" />
+                    <select
+                      value={order.rider_id ?? ""}
+                      onChange={(e) =>
+                        patchOrder(order.id, {
+                          rider_id: e.target.value
+                            ? Number(e.target.value)
+                            : null,
+                        })
+                      }
+                      className="rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-sm text-white outline-none focus:border-[#ff6b1a]"
+                    >
+                      <option value="">No rider</option>
+                      {riders
+                        .filter((r) => r.is_active || r.id === order.rider_id)
+                        .map((r) => (
+                          <option key={r.id} value={r.id}>
+                            {r.name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                )}
+
+                <div className="ml-auto flex flex-wrap gap-2">
+                  <a
+                    href={
+                      order.pos_number
+                        ? waLink(
+                            order.customer_phone,
+                            buildMessage(
+                              templates[TEMPLATE_KEYS.confirm] ?? "",
+                              order,
+                            ),
+                          )
+                        : undefined
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-disabled={!order.pos_number}
+                    title={
+                      order.pos_number
+                        ? "Open WhatsApp with the confirmation message"
+                        : "Enter and save the POS # first"
+                    }
+                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                      order.pos_number
+                        ? "bg-green-600 text-white hover:bg-green-500"
+                        : "pointer-events-none cursor-not-allowed bg-zinc-800 text-zinc-500"
+                    }`}
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" /> Send Confirmation
+                  </a>
+                  {order.order_type === "delivery" && (
+                    <a
+                      href={
+                        order.pos_number && order.rider_id
+                          ? waLink(
+                              order.customer_phone,
+                              buildMessage(
+                                templates[TEMPLATE_KEYS.onTheWay] ?? "",
+                                order,
+                              ),
+                            )
+                          : undefined
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-disabled={!order.pos_number || !order.rider_id}
+                      title={
+                        order.pos_number && order.rider_id
+                          ? "Open WhatsApp with the on-its-way message"
+                          : "Save the POS # and assign a rider first"
+                      }
+                      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        order.pos_number && order.rider_id
+                          ? "bg-green-600 text-white hover:bg-green-500"
+                          : "pointer-events-none cursor-not-allowed bg-zinc-800 text-zinc-500"
+                      }`}
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" /> Send On Its Way
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           ))}

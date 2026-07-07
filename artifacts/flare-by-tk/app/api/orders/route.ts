@@ -242,12 +242,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const orders = await sql(
-      `SELECT id, tracking_token, customer_name, customer_phone,
-              customer_address, order_type, status, total_amount,
-              special_instructions, items, coupon_code, discount_amount,
-              created_at, updated_at
-       FROM orders
-       ORDER BY created_at DESC`,
+      `SELECT o.id, o.tracking_token, o.customer_name, o.customer_phone,
+              o.customer_address, o.order_type, o.status, o.total_amount,
+              o.special_instructions, o.items, o.coupon_code, o.discount_amount,
+              o.pos_number, o.rider_id, r.name AS rider_name, r.phone AS rider_phone,
+              o.created_at, o.updated_at
+       FROM orders o
+       LEFT JOIN riders r ON r.id = o.rider_id
+       ORDER BY o.created_at DESC`,
     );
     return NextResponse.json(orders);
   } catch (err) {

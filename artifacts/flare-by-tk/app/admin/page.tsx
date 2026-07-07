@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
+  Bike,
   ClipboardList,
   Lock,
+  Settings,
   Shield,
   Tag,
   Tags,
@@ -13,14 +15,18 @@ import OrdersTab from "@/components/admin/OrdersTab";
 import MenuTab from "@/components/admin/MenuTab";
 import CategoriesTab from "@/components/admin/CategoriesTab";
 import CouponsTab from "@/components/admin/CouponsTab";
+import RidersTab from "@/components/admin/RidersTab";
+import SettingsTab from "@/components/admin/SettingsTab";
 
-type Tab = "orders" | "menu" | "categories" | "coupons";
+type Tab = "orders" | "menu" | "categories" | "coupons" | "riders" | "settings";
 
 const TABS: { key: Tab; label: string; icon: typeof ClipboardList }[] = [
   { key: "orders", label: "Orders", icon: ClipboardList },
   { key: "menu", label: "Menu Items", icon: UtensilsCrossed },
   { key: "categories", label: "Categories", icon: Tags },
   { key: "coupons", label: "Coupons", icon: Tag },
+  { key: "riders", label: "Riders", icon: Bike },
+  { key: "settings", label: "Settings", icon: Settings },
 ];
 
 export default function AdminPage() {
@@ -138,6 +144,8 @@ export default function AdminPage() {
           />
         )}
         {tab === "coupons" && <CouponsTab onUnauthorized={onUnauthorized} />}
+        {tab === "riders" && <RidersTab onUnauthorized={onUnauthorized} />}
+        {tab === "settings" && <SettingsTab onUnauthorized={onUnauthorized} />}
       </div>
     </div>
   );

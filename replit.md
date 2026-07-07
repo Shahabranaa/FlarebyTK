@@ -24,6 +24,8 @@ Restaurant website for a fast-casual restaurant in Satellite Town, Bahawalpur, P
 - `lib/admin.ts` — admin session token helpers
 - `app/api/*` — REST routes (categories, menu-items, deals, orders, orders/track/[token], orders/[id], admin/login, setup)
 - `components/MenuSection.tsx` — main menu UI with scroll-spy category nav
+- `lib/whatsapp.ts` — Pakistani phone normalization, {placeholder} template fill, wa.me link builder, default message templates
+- Riders + Settings admin tabs; orders carry `pos_number` + `rider_id`; message templates stored in `settings` key/value table (defaults merged server-side)
 
 ## Architecture decisions
 

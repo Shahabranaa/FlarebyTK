@@ -34,6 +34,7 @@ Restaurant website for a fast-casual restaurant in Satellite Town, Bahawalpur, P
 - Expo SDK 54 Android app; user builds APK themselves via EAS (free Expo account) — full instructions in `artifacts/flare-admin-mobile/BUILD_APK.md`; NEVER run EAS CLI here
 - Connects to configurable base URL (default https://flarebytk.com); password login stored in AsyncStorage, cookie auth with auto re-login on 401 (`lib/api.tsx`)
 - Rings looping alarm (`assets/sounds/order_alarm.mp3`, ffmpeg-synthesized) + keep-awake while any order is `new`; Android channel "orders" (MAX, custom sound `order_alarm.wav`) for locked/closed-phone push
+- Order detail screen has full flow: POS number entry, rider chips (delivery only, `/api/riders`), WhatsApp wa.me buttons using templates from `/api/settings` (helpers duplicated in `lib/whatsapp.ts` — keep in sync with web copy)
 - android.package `com.flarebytk.admin`; push on standalone Android needs the user's Firebase FCM key (covered in BUILD_APK.md)
 
 ## Architecture decisions

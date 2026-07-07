@@ -26,6 +26,15 @@ Restaurant website for a fast-casual restaurant in Satellite Town, Bahawalpur, P
 - `components/MenuSection.tsx` — main menu UI with scroll-spy category nav
 - `lib/whatsapp.ts` — Pakistani phone normalization, {placeholder} template fill, wa.me link builder, default message templates
 - Riders + Settings admin tabs; orders carry `pos_number` + `rider_id`; message templates stored in `settings` key/value table (defaults merged server-side)
+- Order statuses: new → accepted → preparing → ready → delivered (+cancelled)
+- Push: `device_tokens` table, `lib/push.ts` (Expo push API), POST `/api/devices` (admin) registers tokens; push fired on order create; `/api/cron/remind` re-pushes while orders are `new` (vercel.json cron every minute — Hobby plan runs crons once/day; rate-limited via `settings.last_remind_at`, auth via CRON_SECRET bearer or vercel-cron user-agent)
+
+## Admin mobile app (artifacts/flare-admin-mobile)
+
+- Expo SDK 54 Android app; user builds APK themselves via EAS (free Expo account) — full instructions in `artifacts/flare-admin-mobile/BUILD_APK.md`; NEVER run EAS CLI here
+- Connects to configurable base URL (default https://flarebytk.com); password login stored in AsyncStorage, cookie auth with auto re-login on 401 (`lib/api.tsx`)
+- Rings looping alarm (`assets/sounds/order_alarm.mp3`, ffmpeg-synthesized) + keep-awake while any order is `new`; Android channel "orders" (MAX, custom sound `order_alarm.wav`) for locked/closed-phone push
+- android.package `com.flarebytk.admin`; push on standalone Android needs the user's Firebase FCM key (covered in BUILD_APK.md)
 
 ## Architecture decisions
 

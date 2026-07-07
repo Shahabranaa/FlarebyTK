@@ -47,17 +47,25 @@ function buildMessage(template: string, order: Order): string {
   });
 }
 
-const STATUSES = ["new", "preparing", "ready", "delivered", "cancelled"];
+const STATUSES = [
+  "new",
+  "accepted",
+  "preparing",
+  "ready",
+  "delivered",
+  "cancelled",
+];
 
 const STATUS_COLORS: Record<string, string> = {
   new: "bg-blue-500/15 text-blue-400",
+  accepted: "bg-purple-500/15 text-purple-400",
   preparing: "bg-yellow-500/15 text-yellow-400",
   ready: "bg-green-500/15 text-green-400",
   delivered: "bg-zinc-500/15 text-zinc-400",
   cancelled: "bg-red-500/15 text-red-400",
 };
 
-const CURRENT_STATUSES = new Set(["new", "preparing", "ready"]);
+const CURRENT_STATUSES = new Set(["new", "accepted", "preparing", "ready"]);
 
 type Filter = "current" | "past" | "all";
 

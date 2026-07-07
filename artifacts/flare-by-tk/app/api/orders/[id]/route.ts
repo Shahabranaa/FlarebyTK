@@ -4,7 +4,14 @@ import { isAdmin } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
-const VALID_STATUSES = ["new", "preparing", "ready", "delivered", "cancelled"];
+const VALID_STATUSES = [
+  "new",
+  "accepted",
+  "preparing",
+  "ready",
+  "delivered",
+  "cancelled",
+];
 
 export async function PATCH(
   request: NextRequest,

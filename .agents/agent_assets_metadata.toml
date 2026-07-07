@@ -132,6 +132,12 @@ uri = "file://artifacts/flare-by-tk/public/menu/zinger-roll.png"
 type = "image"
 title = "generated_image"
 
+[[generated]]
+id = "BoYNadEjr7BXFTSXpV-z_"
+uri = "file://artifacts/flare-admin-mobile/assets/images/icon.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "yJXvqWxBa46ezGZM8q2xU"
 uri = "file://attached_assets/stock_images/masala-fries.jpg"

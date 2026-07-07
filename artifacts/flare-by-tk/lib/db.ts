@@ -123,6 +123,12 @@ CREATE TABLE IF NOT EXISTS settings (
 
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS pos_number TEXT;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS rider_id INTEGER REFERENCES riders(id) ON DELETE SET NULL;
+
+CREATE TABLE IF NOT EXISTS device_tokens (
+  token TEXT PRIMARY KEY,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 `;
 
 function ensureSchema(): Promise<void> {

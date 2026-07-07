@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { sql, withTransaction } from "@/lib/db";
 import { isAdmin } from "@/lib/admin";
+import { sendPushToAdminDevices } from "@/lib/push";
 import {
   COUPON_COLUMNS,
   CouponLine,
@@ -215,6 +216,14 @@ export async function POST(request: NextRequest) {
     }
 
     const order = outcome.order;
+
+    // Notify admin devices (best-effort, never blocks the response).
+    void sendPushToAdminDevices(
+      "New Order!",
+      `${customerName.trim()} — Rs. ${Math.round(Number(order.total_amount)).toLocaleString("en-PK")} (${orderType})`,
+      { orderId: order.id },
+    );
+
     return NextResponse.json(
       {
         id: order.id,

@@ -32,6 +32,7 @@ interface Order {
 
 const STEPS = [
   { key: "new", label: "Order Received", icon: CircleDashed },
+  { key: "accepted", label: "Confirmed", icon: CircleDashed },
   { key: "preparing", label: "Preparing", icon: ChefHat },
   { key: "ready", label: "Ready", icon: PackageCheck },
   { key: "delivered", label: "Delivered", icon: Bike },

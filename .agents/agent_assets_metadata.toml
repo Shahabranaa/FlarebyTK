@@ -1,0 +1,385 @@
+uploads = []
+
+[[generated]]
+id = "ITxXdVNssUIaVLp0gXhD2"
+uri = "file://artifacts/flare-by-tk/public/menu/french-fries.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "kiX7PbaqjbL7E_qMf_Euz"
+uri = "file://artifacts/flare-by-tk/public/menu/masala-fries.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "TTPs9KafTC0BD4tDe_OCA"
+uri = "file://artifacts/flare-by-tk/public/menu/loaded-fries.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "zCCgq9mEIalcIQL0xx4MS"
+uri = "file://artifacts/flare-by-tk/public/menu/curly-fries.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "niWwkkTAklM5eIkmNZ32Y"
+uri = "file://artifacts/flare-by-tk/public/menu/pizza-fries.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "9I8JynRZCfntfXpAY9qry"
+uri = "file://artifacts/flare-by-tk/public/menu/waffle-fries.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "W0nFk_5w8sp6GkmpkMXKp"
+uri = "file://artifacts/flare-by-tk/public/menu/peri-peri-pizza.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "3bo2FggDhFRj-bzMulcWE"
+uri = "file://artifacts/flare-by-tk/public/menu/crown-crust-pizza.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "eYs78bXBwDzFgmaOog69r"
+uri = "file://artifacts/flare-by-tk/public/menu/bbq-pizza.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "lbvsoMgXJCgPkPD9YAGx1"
+uri = "file://artifacts/flare-by-tk/public/menu/beef-sandwich.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "P-XDqjd6yvW2bgJkJjIu8"
+uri = "file://artifacts/flare-by-tk/public/menu/chapli-burger.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "DXppxFewTyeOuvR2eDV5v"
+uri = "file://artifacts/flare-by-tk/public/menu/club-sandwich.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "3-HE-utvlVs0F4tSvjX-L"
+uri = "file://artifacts/flare-by-tk/public/menu/crunchy-wrap.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "-jkUi80zGCEWPVT556XSI"
+uri = "file://artifacts/flare-by-tk/public/menu/fajita-pizza.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "rpEAOnz6z9RoBrmf_cl2l"
+uri = "file://artifacts/flare-by-tk/public/menu/lacha-burger.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "R-Wp8Gn-jFgewsZ4FjJNM"
+uri = "file://artifacts/flare-by-tk/public/menu/malai-boti-roll.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "AXSlsnXOBAi7LDtDR5qVu"
+uri = "file://artifacts/flare-by-tk/public/menu/mighty-burger.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "ABoN-F_2kskey8m_KNtCf"
+uri = "file://artifacts/flare-by-tk/public/menu/panini.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "Abn2T7c5XEyLDw1cMPZB3"
+uri = "file://artifacts/flare-by-tk/public/menu/sando.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "DuRSJWPFyiBHysCFnS-IC"
+uri = "file://artifacts/flare-by-tk/public/menu/tikka-pizza.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "F3KB4Xzl0nkxsSINyeCfW"
+uri = "file://artifacts/flare-by-tk/public/menu/zinger-burger.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "pj8ZqaJ4UpLoazsHMkOx8"
+uri = "file://artifacts/flare-by-tk/public/menu/zinger-roll.png"
+type = "image"
+title = "generated_image"
+
+[[outputs]]
+id = "yJXvqWxBa46ezGZM8q2xU"
+uri = "file://attached_assets/stock_images/masala-fries.jpg"
+type = "image"
+title = "spicy masala fries with seasoning"
+
+[[outputs]]
+id = "5EoTeDTGVt-pLOnAm-1iY"
+uri = "file://attached_assets/stock_images/loaded-fries.jpg"
+type = "image"
+title = "loaded fries with cheese sauce and toppings"
+
+[[outputs]]
+id = "2N4NGtsR2sLvyGXI8Px1q"
+uri = "file://attached_assets/stock_images/french-fries.jpg"
+type = "image"
+title = "crispy golden french fries close up"
+
+[[outputs]]
+id = "pAJWUgPupy366Hg8OaOBP"
+uri = "file://attached_assets/stock_images/curly-fries.jpg"
+type = "image"
+title = "curly fries seasoned"
+
+[[outputs]]
+id = "pWoIl7VxX-m9W46PTcHbK"
+uri = "file://attached_assets/stock_images/pizza-fries.jpg"
+type = "image"
+title = "pizza fries with melted cheese and toppings"
+
+[[outputs]]
+id = "rkdlVjuZJFtJCsbnkrDqi"
+uri = "file://attached_assets/stock_images/waffle-fries.jpg"
+type = "image"
+title = "waffle cut fries crispy"
+
+[[outputs]]
+id = "A-e7amtK1FkKrO8ZdZ5kF"
+uri = "file://attached_assets/stock_images/smash-burger.jpg"
+type = "image"
+title = "beef smash burger with melted cheese"
+
+[[outputs]]
+id = "Zc2PNOjvzzAA825vJ-CW1"
+uri = "file://attached_assets/stock_images/zinger-burger.jpg"
+type = "image"
+title = "crispy fried chicken zinger burger"
+
+[[outputs]]
+id = "4OtrznBMulYJVQ7QsdXMa"
+uri = "file://attached_assets/stock_images/double-smash-burger.jpg"
+type = "image"
+title = "double beef smash burger stacked"
+
+[[outputs]]
+id = "iYHgx4MWYsWuOr4d7A0S1"
+uri = "file://attached_assets/stock_images/mighty-burger.jpg"
+type = "image"
+title = "big crispy chicken burger loaded"
+
+[[outputs]]
+id = "IvercQMtaHZ5hq5GywG0C"
+uri = "file://attached_assets/stock_images/grilled-burger.jpg"
+type = "image"
+title = "flame grilled chicken burger"
+
+[[outputs]]
+id = "d5S82JjYnFMGG7L7-m09h"
+uri = "file://attached_assets/stock_images/long-burger.jpg"
+type = "image"
+title = "long chicken burger sandwich sub"
+
+[[outputs]]
+id = "ww8uJzg5Ve3Y7ZHwFzkaK"
+uri = "file://attached_assets/stock_images/patty-burger.jpg"
+type = "image"
+title = "classic burger with patty and lettuce"
+
+[[outputs]]
+id = "TOPGQ1_w9r1CQGcqit9T4"
+uri = "file://attached_assets/stock_images/chicken-roll.jpg"
+type = "image"
+title = "grilled chicken paratha roll wrap"
+
+[[outputs]]
+id = "3uMnSc6bd2MlLixpJYnkR"
+uri = "file://attached_assets/stock_images/peri-peri-roll.jpg"
+type = "image"
+title = "spicy peri peri chicken roll"
+
+[[outputs]]
+id = "-dkK31KLSb_NYyDM8fd5T"
+uri = "file://attached_assets/stock_images/zinger-roll.jpg"
+type = "image"
+title = "crispy fried chicken roll wrap"
+
+[[outputs]]
+id = "hgWOTJ1ugafZJDYzXnyBz"
+uri = "file://attached_assets/stock_images/malai-boti-roll.jpg"
+type = "image"
+title = "creamy malai boti chicken roll"
+
+[[outputs]]
+id = "6L3ZPC42sL1QAjRTgDYmO"
+uri = "file://attached_assets/stock_images/chapli-burger.jpg"
+type = "image"
+title = "chapli kebab burger pakistani"
+
+[[outputs]]
+id = "78TiCdS7ThpdlH-lOW2Ws"
+uri = "file://attached_assets/stock_images/crunchy-wrap.jpg"
+type = "image"
+title = "crunchy wrap supreme tortilla"
+
+[[outputs]]
+id = "Sz5T7xurjyi7LlTlSYCiC"
+uri = "file://attached_assets/stock_images/turkish-wrap.jpg"
+type = "image"
+title = "turkish doner kebab wrap"
+
+[[outputs]]
+id = "RGry46IQQla071XLybNF4"
+uri = "file://attached_assets/stock_images/beef-wrap.jpg"
+type = "image"
+title = "grilled beef wrap tortilla"
+
+[[outputs]]
+id = "j6VCc4vskX28uPwf_2PfU"
+uri = "file://attached_assets/stock_images/tortilla-wrap.jpg"
+type = "image"
+title = "chicken tortilla wrap grilled"
+
+[[outputs]]
+id = "01rEtvIXNEr_XtKEjxjMe"
+uri = "file://attached_assets/stock_images/lacha-burger.jpg"
+type = "image"
+title = "crispy layered paratha chicken burger"
+
+[[outputs]]
+id = "Pckhf4zK-uNAY6rAbT4u2"
+uri = "file://attached_assets/stock_images/behari-burger.jpg"
+type = "image"
+title = "spicy behari kebab beef burger"
+
+[[outputs]]
+id = "SJt8vyGtte3ZP5zKn7kBI"
+uri = "file://attached_assets/stock_images/peri-peri-pizza.jpg"
+type = "image"
+title = "spicy peri peri chicken pizza"
+
+[[outputs]]
+id = "riX67liSomPU6C-muaxkH"
+uri = "file://attached_assets/stock_images/malai-boti-pizza.jpg"
+type = "image"
+title = "creamy white sauce chicken pizza"
+
+[[outputs]]
+id = "J8modVV9bGrl3uKD8g9Xi"
+uri = "file://attached_assets/stock_images/broast.jpg"
+type = "image"
+title = "whole fried chicken broast crispy golden"
+
+[[outputs]]
+id = "ykHW3E5JvP-yAOfV_leLe"
+uri = "file://attached_assets/stock_images/crown-crust-pizza.jpg"
+type = "image"
+title = "crown crust stuffed pizza"
+
+[[outputs]]
+id = "un4XI9MPjTSn1T39WstS9"
+uri = "file://attached_assets/stock_images/fajita-pizza.jpg"
+type = "image"
+title = "chicken fajita pizza with peppers"
+
+[[outputs]]
+id = "oqimA20dmuOItaeiBD5-b"
+uri = "file://attached_assets/stock_images/tikka-pizza.jpg"
+type = "image"
+title = "chicken tikka pizza"
+
+[[outputs]]
+id = "5alrMhGsO11Ir07aA9D2S"
+uri = "file://attached_assets/stock_images/kabab-pizza.jpg"
+type = "image"
+title = "kebab crust pizza"
+
+[[outputs]]
+id = "sgYeIUtZJ5TV_X-OCoTHT"
+uri = "file://attached_assets/stock_images/cheese-pizza.jpg"
+type = "image"
+title = "cheese pizza melted mozzarella"
+
+[[outputs]]
+id = "x-rRT-BFx9Xa8LIuuT35P"
+uri = "file://attached_assets/stock_images/bbq-pizza.jpg"
+type = "image"
+title = "bbq chicken pizza"
+
+[[outputs]]
+id = "uoGBgKmcgTFH9_lo0FRrw"
+uri = "file://attached_assets/stock_images/sando.jpg"
+type = "image"
+title = "japanese chicken katsu sando sandwich"
+
+[[outputs]]
+id = "BOSNm_YrQjxrgJlGHmwsg"
+uri = "file://attached_assets/stock_images/club-sandwich.jpg"
+type = "image"
+title = "triple decker club sandwich"
+
+[[outputs]]
+id = "6ybfdVYZew041We9ytwGZ"
+uri = "file://attached_assets/stock_images/grilled-sandwich.jpg"
+type = "image"
+title = "grilled cheese chicken sandwich"
+
+[[outputs]]
+id = "zeRjgG14M2HMEHL7JegAW"
+uri = "file://attached_assets/stock_images/panini.jpg"
+type = "image"
+title = "grilled panini sandwich pressed"
+
+[[outputs]]
+id = "VJqfIciHn9HIJ1QIxXEyp"
+uri = "file://attached_assets/stock_images/beef-sandwich.jpg"
+type = "image"
+title = "smash beef sandwich melted cheese"
+
+[[outputs]]
+id = "THaqPNKeXZyLVC4c4x_wP"
+uri = "file://attached_assets/stock_images/sky-sip.jpg"
+type = "image"
+title = "refreshing iced fruit drink glass"
+
+[[outputs]]
+id = "ywj8AF__i6QNTLHG4aRJH"
+uri = "file://attached_assets/stock_images/regular-drink.jpg"
+type = "image"
+title = "cold soft drink glass with ice"
+
+[[outputs]]
+id = "bGQGBxLBr0GG5-b9GGTAV"
+uri = "file://attached_assets/stock_images/soft-drink.jpg"
+type = "image"
+title = "cold soda can with ice"
+
+[[outputs]]
+id = "qKr5NkWvWuzQzIUXHX6bS"
+uri = "file://attached_assets/stock_images/water.jpg"
+type = "image"
+title = "bottled mineral water"

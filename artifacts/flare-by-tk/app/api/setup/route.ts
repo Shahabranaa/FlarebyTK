@@ -58,6 +58,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    if (force) {
+      // Full re-seed: wipe menu data so removed items don't linger.
+      // Orders are untouched (they snapshot item names/prices).
+      await sql(`DELETE FROM deals`);
+      await sql(`DELETE FROM menu_items`);
+      await sql(`DELETE FROM categories`);
+    }
+
     for (const cat of seedCategories) {
       await sql(
         `INSERT INTO categories (name, slug, description, image_url, sort_order, is_active)

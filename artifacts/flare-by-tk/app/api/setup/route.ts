@@ -36,6 +36,10 @@ export async function GET(request: NextRequest) {
   if (!authorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Allow running the seed from a browser: /api/setup?key=...&seed=true&force=true
+  if (request.nextUrl.searchParams.get("seed") === "true") {
+    return runSeed(request);
+  }
   try {
     return NextResponse.json(await counts());
   } catch (err) {
@@ -45,6 +49,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!authorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return runSeed(request);
+}
+
+async function runSeed(request: NextRequest) {
   if (!authorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

@@ -26,12 +26,19 @@ async function ensureOrdersChannel(): Promise<void> {
   });
 }
 
+export type PushSetupResult =
+  | { ok: true; token: string }
+  | { ok: false; reason: "unsupported" | "permission-denied" | "no-firebase" };
+
 /**
  * Requests notification permission and returns the Expo push token,
- * or null when push is unavailable (web, simulator, Expo Go, denied).
+ * or a reason why push is unavailable (web, simulator, Expo Go, denied,
+ * missing Firebase credentials in the APK build).
  */
-export async function getPushTokenAsync(): Promise<string | null> {
-  if (Platform.OS === "web" || !Device.isDevice) return null;
+export async function setupPushAsync(): Promise<PushSetupResult> {
+  if (Platform.OS === "web" || !Device.isDevice) {
+    return { ok: false, reason: "unsupported" };
+  }
   try {
     await ensureOrdersChannel();
     const existing = await Notifications.getPermissionsAsync();
@@ -39,7 +46,9 @@ export async function getPushTokenAsync(): Promise<string | null> {
     if (status !== "granted") {
       status = (await Notifications.requestPermissionsAsync()).status;
     }
-    if (status !== "granted") return null;
+    if (status !== "granted") {
+      return { ok: false, reason: "permission-denied" };
+    }
     const projectId =
       Constants?.expoConfig?.extra?.eas?.projectId ??
       (Constants as unknown as { easConfig?: { projectId?: string } })
@@ -47,9 +56,10 @@ export async function getPushTokenAsync(): Promise<string | null> {
     const token = await Notifications.getExpoPushTokenAsync(
       projectId ? { projectId } : undefined,
     );
-    return token.data;
+    return { ok: true, token: token.data };
   } catch {
-    // Expo Go on Android no longer supports remote push — the APK build does.
-    return null;
+    // Typical causes: Expo Go on Android (no remote push support) or an
+    // APK built without Firebase (google-services.json / FCM key missing).
+    return { ok: false, reason: "no-firebase" };
   }
 }

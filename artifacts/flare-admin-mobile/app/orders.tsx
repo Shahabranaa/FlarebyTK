@@ -19,7 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Order, rs, useAuth } from "@/lib/api";
 import { useOrderAlarm } from "@/lib/alarm";
-import { getPushTokenAsync } from "@/lib/notifications";
+import { setupPushAsync } from "@/lib/notifications";
 
 type Filter = "new" | "active" | "past";
 
@@ -78,19 +78,35 @@ export default function OrdersScreen() {
   });
 
   // Register this device for push notifications once logged in.
+  const [pushWarning, setPushWarning] = useState<string | null>(null);
   useEffect(() => {
     if (!ready || !loggedIn) return;
     (async () => {
-      const token = await getPushTokenAsync();
-      if (!token) return;
+      const result = await setupPushAsync();
+      if (!result.ok) {
+        if (result.reason === "permission-denied") {
+          setPushWarning(
+            "Notifications are blocked — enable them in Android Settings → Apps → Flare Admin, or you won't hear closed-app alerts.",
+          );
+        } else if (result.reason === "no-firebase") {
+          setPushWarning(
+            "Background alerts are OFF — this build is missing the Firebase setup (see BUILD_APK.md, 'Enable push notifications'). Orders only ring while the app is open.",
+          );
+        }
+        return;
+      }
       try {
-        await apiFetch("/api/devices", {
+        const res = await apiFetch("/api/devices", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token }),
+          body: JSON.stringify({ token: result.token }),
         });
+        if (!res.ok) throw new Error(`Failed (${res.status})`);
+        setPushWarning(null);
       } catch {
-        // Best effort — polling still works without push.
+        setPushWarning(
+          "Could not register this phone for background alerts — check the connection and reopen the app.",
+        );
       }
     })();
   }, [ready, loggedIn, apiFetch]);
@@ -199,6 +215,15 @@ export default function OrdersScreen() {
           >
             {newOrders.length} new order{newOrders.length === 1 ? "" : "s"} —
             accept to stop ringing
+          </Text>
+        </View>
+      ) : null}
+
+      {pushWarning ? (
+        <View style={[styles.warnBar, { backgroundColor: "#7a5200" }]}>
+          <Ionicons name="warning" size={16} color="#ffd166" />
+          <Text style={[styles.warnBarText, { color: "#ffd166" }]}>
+            {pushWarning}
           </Text>
         </View>
       ) : null}
@@ -426,6 +451,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   alertBarText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  warnBar: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  warnBarText: { fontSize: 12, fontFamily: "Inter_600SemiBold", flex: 1 },
   tabs: { flexDirection: "row", gap: 8, padding: 16, paddingBottom: 4 },
   tab: { paddingHorizontal: 14, paddingVertical: 8 },
   tabText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },

@@ -68,6 +68,26 @@ CREATE TABLE IF NOT EXISTS deals (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS coupons (
+  id SERIAL PRIMARY KEY,
+  code TEXT NOT NULL UNIQUE,
+  description TEXT,
+  discount_type TEXT NOT NULL DEFAULT 'percent',
+  discount_value NUMERIC(10,2) NOT NULL,
+  scope TEXT NOT NULL DEFAULT 'order',
+  item_id INTEGER REFERENCES menu_items(id) ON DELETE SET NULL,
+  category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+  min_order_amount NUMERIC(10,2),
+  starts_at TIMESTAMPTZ,
+  ends_at TIMESTAMPTZ,
+  days_of_week INTEGER[] NOT NULL DEFAULT '{}',
+  max_uses INTEGER,
+  used_count INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS orders (
   id SERIAL PRIMARY KEY,
   tracking_token UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
@@ -82,6 +102,9 @@ CREATE TABLE IF NOT EXISTS orders (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS coupon_code TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount_amount NUMERIC(10,2) NOT NULL DEFAULT 0;
 `;
 
 function ensureSchema(): Promise<void> {
@@ -111,4 +134,34 @@ export async function sql<T = any>(
   await ensureSchema();
   const result = await getPool().query(text, params as never[]);
   return result.rows as T[];
+}
+
+export interface TxClient {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sql<T = any>(text: string, params?: unknown[]): Promise<T[]>;
+}
+
+/** Runs `fn` inside a single database transaction; rolls back on any error. */
+export async function withTransaction<R>(
+  fn: (tx: TxClient) => Promise<R>,
+): Promise<R> {
+  await ensureSchema();
+  const client = await getPool().connect();
+  try {
+    await client.query("BEGIN");
+    const tx: TxClient = {
+      async sql(text, params = []) {
+        const result = await client.query(text, params as never[]);
+        return result.rows;
+      },
+    };
+    const result = await fn(tx);
+    await client.query("COMMIT");
+    return result;
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => undefined);
+    throw err;
+  } finally {
+    client.release();
+  }
 }

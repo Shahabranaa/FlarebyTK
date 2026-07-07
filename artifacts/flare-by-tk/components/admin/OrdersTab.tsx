@@ -20,6 +20,8 @@ interface Order {
   order_type: string;
   status: string;
   total_amount: string;
+  coupon_code: string | null;
+  discount_amount: string | null;
   special_instructions: string | null;
   items: OrderItem[];
   created_at: string;
@@ -174,6 +176,11 @@ export default function OrdersTab({
                   <p className="text-lg font-bold text-[#ff6b1a]">
                     {rs(order.total_amount)}
                   </p>
+                  {order.coupon_code && Number(order.discount_amount) > 0 && (
+                    <p className="text-xs font-semibold text-green-400">
+                      {order.coupon_code} · -{rs(order.discount_amount ?? 0)}
+                    </p>
+                  )}
                   <select
                     value={order.status}
                     onChange={(e) => updateStatus(order.id, e.target.value)}

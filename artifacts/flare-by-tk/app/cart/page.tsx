@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Tag, Trash2, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
 
 const DELIVERY_FEE = 150;
@@ -22,9 +22,46 @@ export default function CartPage() {
   const [instructions, setInstructions] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [coupon, setCoupon] = useState<{
+    code: string;
+    discount: number;
+  } | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [checkingCoupon, setCheckingCoupon] = useState(false);
 
   const deliveryFee = orderType === "delivery" ? DELIVERY_FEE : 0;
-  const total = subtotal + deliveryFee;
+  const discount = coupon ? Math.min(coupon.discount, subtotal) : 0;
+  const total = subtotal - discount + deliveryFee;
+
+  async function applyCoupon() {
+    const code = couponInput.trim();
+    if (!code) return;
+    setCouponError(null);
+    setCheckingCoupon(true);
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          items: items.map((i) => ({ id: i.id, qty: i.qty })),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCoupon(null);
+        setCouponError(data?.error || "Invalid coupon");
+        return;
+      }
+      setCoupon({ code: data.code, discount: data.discount });
+      setCouponInput("");
+    } catch {
+      setCouponError("Could not check the coupon. Try again.");
+    } finally {
+      setCheckingCoupon(false);
+    }
+  }
 
   async function placeOrder() {
     setError(null);
@@ -46,6 +83,7 @@ export default function CartPage() {
           orderType,
           specialInstructions: instructions || null,
           items: items.map((i) => ({ id: i.id, qty: i.qty })),
+          couponCode: coupon?.code ?? null,
         }),
       });
       const data = await res.json();
@@ -184,11 +222,59 @@ export default function CartPage() {
             />
           </div>
 
-          <div className="mt-5 space-y-2 border-t border-zinc-800 pt-4 text-sm">
+          <div className="mt-4 border-t border-zinc-800 pt-4">
+            {coupon ? (
+              <div className="flex items-center justify-between rounded-lg bg-green-500/10 px-3 py-2 text-sm">
+                <span className="flex items-center gap-2 font-semibold text-green-400">
+                  <Tag className="h-4 w-4" /> {coupon.code} applied
+                </span>
+                <button
+                  onClick={() => {
+                    setCoupon(null);
+                    setCouponError(null);
+                  }}
+                  className="text-zinc-400 hover:text-white"
+                  aria-label="Remove coupon"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") applyCoupon();
+                  }}
+                  placeholder="Coupon code"
+                  className="min-w-0 flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm uppercase text-white placeholder-zinc-500 outline-none focus:border-[#ff6b1a]"
+                />
+                <button
+                  onClick={applyCoupon}
+                  disabled={checkingCoupon || !couponInput.trim()}
+                  className="rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:border-[#ff6b1a] disabled:opacity-50"
+                >
+                  {checkingCoupon ? "…" : "Apply"}
+                </button>
+              </div>
+            )}
+            {couponError && (
+              <p className="mt-2 text-xs text-red-400">{couponError}</p>
+            )}
+          </div>
+
+          <div className="mt-4 space-y-2 border-t border-zinc-800 pt-4 text-sm">
             <div className="flex justify-between text-zinc-400">
               <span>Subtotal</span>
               <span>{rs(subtotal)}</span>
             </div>
+            {discount > 0 && coupon && (
+              <div className="flex justify-between text-green-400">
+                <span>Discount ({coupon.code})</span>
+                <span>-{rs(discount)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-zinc-400">
               <span>Delivery fee</span>
               <span>{orderType === "delivery" ? rs(DELIVERY_FEE) : "Free"}</span>

@@ -1,7 +1,14 @@
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { sql } from "@/lib/db";
+import { sql, withTransaction } from "@/lib/db";
 import { isAdmin } from "@/lib/admin";
+import {
+  COUPON_COLUMNS,
+  CouponLine,
+  CouponRow,
+  evaluateCoupon,
+  normalizeCode,
+} from "@/lib/coupons";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +33,7 @@ export async function POST(request: NextRequest) {
       orderType,
       specialInstructions,
       items,
+      couponCode,
     } = body as Record<string, unknown>;
 
     if (typeof customerName !== "string" || !customerName.trim()) {
@@ -72,8 +80,13 @@ export async function POST(request: NextRequest) {
     }
 
     const ids = normalized.map((i) => i.id);
-    const rows = await sql<{ id: number; name: string; price: string }>(
-      `SELECT id, name, price FROM menu_items
+    const rows = await sql<{
+      id: number;
+      name: string;
+      price: string;
+      category_id: number | null;
+    }>(
+      `SELECT id, name, price, category_id FROM menu_items
        WHERE id = ANY($1::int[]) AND is_available = TRUE`,
       [ids],
     );
@@ -85,6 +98,7 @@ export async function POST(request: NextRequest) {
       price: number;
       qty: number;
     }[] = [];
+    const lines: CouponLine[] = [];
     let subtotal = 0;
     for (const item of normalized) {
       const row = byId.get(item.id);
@@ -97,47 +111,118 @@ export async function POST(request: NextRequest) {
       const price = Number(row.price);
       subtotal += price * item.qty;
       orderItems.push({ id: row.id, name: row.name, price, qty: item.qty });
+      lines.push({
+        itemId: row.id,
+        categoryId: row.category_id,
+        price,
+        qty: item.qty,
+      });
     }
 
-    const totalAmount =
-      subtotal + (orderType === "delivery" ? DELIVERY_FEE : 0);
+    // Coupon validation + order insert run in a single transaction. The
+    // coupon row is locked (FOR UPDATE) and used_count is incremented in the
+    // same transaction, so concurrent orders can't over-redeem a limited
+    // coupon, and a discounted order can't persist without consuming a use.
+    const code = normalizeCode(couponCode);
+    const outcome = await withTransaction<
+      | { kind: "error"; message: string }
+      | {
+          kind: "ok";
+          order: {
+            id: number;
+            tracking_token: string;
+            status: string;
+            total_amount: string;
+            created_at: string;
+          };
+          discount: number;
+          couponCode: string | null;
+        }
+    >(async (tx) => {
+      let discount = 0;
+      let appliedCoupon: CouponRow | null = null;
+      if (code) {
+        const [coupon] = await tx.sql<CouponRow>(
+          `SELECT ${COUPON_COLUMNS} FROM coupons WHERE code = $1 FOR UPDATE`,
+          [code],
+        );
+        if (!coupon) {
+          return { kind: "error", message: "That coupon code doesn’t exist." };
+        }
+        const result = evaluateCoupon(coupon, lines, subtotal);
+        if (!result.ok) {
+          return { kind: "error", message: result.reason };
+        }
+        const updated = await tx.sql(
+          `UPDATE coupons SET used_count = used_count + 1, updated_at = NOW()
+           WHERE id = $1 AND (max_uses IS NULL OR used_count < max_uses)
+           RETURNING id`,
+          [coupon.id],
+        );
+        if (updated.length === 0) {
+          return {
+            kind: "error",
+            message: "This coupon has been fully redeemed.",
+          };
+        }
+        discount = result.discount;
+        appliedCoupon = coupon;
+      }
 
-    const inserted = await sql<{
-      id: number;
-      tracking_token: string;
-      status: string;
-      total_amount: string;
-      created_at: string;
-    }>(
-      `INSERT INTO orders
-         (tracking_token, customer_name, customer_phone, customer_address, order_type,
-          special_instructions, total_amount, items)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
-       RETURNING id, tracking_token, status, total_amount, created_at`,
-      [
-        // Generated in app code — some managed Postgres setups lack a working
-        // gen_random_uuid() default (pgcrypto unavailable), which made the DB
-        // default silently absent and inserts fail with a NOT NULL violation.
-        randomUUID(),
-        customerName.trim(),
-        customerPhone.trim(),
-        typeof customerAddress === "string" ? customerAddress.trim() : null,
-        orderType,
-        typeof specialInstructions === "string"
-          ? specialInstructions.trim() || null
-          : null,
-        totalAmount,
-        JSON.stringify(orderItems),
-      ],
-    );
+      const totalAmount =
+        subtotal - discount + (orderType === "delivery" ? DELIVERY_FEE : 0);
 
-    const order = inserted[0];
+      const inserted = await tx.sql<{
+        id: number;
+        tracking_token: string;
+        status: string;
+        total_amount: string;
+        created_at: string;
+      }>(
+        `INSERT INTO orders
+           (tracking_token, customer_name, customer_phone, customer_address, order_type,
+            special_instructions, total_amount, items, coupon_code, discount_amount)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10)
+         RETURNING id, tracking_token, status, total_amount, created_at`,
+        [
+          // Generated in app code — some managed Postgres setups lack a working
+          // gen_random_uuid() default (pgcrypto unavailable), which made the DB
+          // default silently absent and inserts fail with a NOT NULL violation.
+          randomUUID(),
+          customerName.trim(),
+          customerPhone.trim(),
+          typeof customerAddress === "string" ? customerAddress.trim() : null,
+          orderType,
+          typeof specialInstructions === "string"
+            ? specialInstructions.trim() || null
+            : null,
+          totalAmount,
+          JSON.stringify(orderItems),
+          appliedCoupon ? appliedCoupon.code : null,
+          discount,
+        ],
+      );
+      return {
+        kind: "ok",
+        order: inserted[0],
+        discount,
+        couponCode: appliedCoupon ? appliedCoupon.code : null,
+      };
+    });
+
+    if (outcome.kind === "error") {
+      return NextResponse.json({ error: outcome.message }, { status: 400 });
+    }
+
+    const order = outcome.order;
     return NextResponse.json(
       {
         id: order.id,
         trackingToken: order.tracking_token,
         status: order.status,
         totalAmount: Number(order.total_amount),
+        discount: outcome.discount,
+        couponCode: outcome.couponCode,
         createdAt: order.created_at,
       },
       { status: 201 },
@@ -159,7 +244,8 @@ export async function GET(request: NextRequest) {
     const orders = await sql(
       `SELECT id, tracking_token, customer_name, customer_phone,
               customer_address, order_type, status, total_amount,
-              special_instructions, items, created_at, updated_at
+              special_instructions, items, coupon_code, discount_amount,
+              created_at, updated_at
        FROM orders
        ORDER BY created_at DESC`,
     );

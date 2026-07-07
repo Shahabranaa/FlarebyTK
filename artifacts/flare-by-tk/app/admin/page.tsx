@@ -1,17 +1,26 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ClipboardList, Lock, Shield, Tags, UtensilsCrossed } from "lucide-react";
+import {
+  ClipboardList,
+  Lock,
+  Shield,
+  Tag,
+  Tags,
+  UtensilsCrossed,
+} from "lucide-react";
 import OrdersTab from "@/components/admin/OrdersTab";
 import MenuTab from "@/components/admin/MenuTab";
 import CategoriesTab from "@/components/admin/CategoriesTab";
+import CouponsTab from "@/components/admin/CouponsTab";
 
-type Tab = "orders" | "menu" | "categories";
+type Tab = "orders" | "menu" | "categories" | "coupons";
 
 const TABS: { key: Tab; label: string; icon: typeof ClipboardList }[] = [
   { key: "orders", label: "Orders", icon: ClipboardList },
   { key: "menu", label: "Menu Items", icon: UtensilsCrossed },
   { key: "categories", label: "Categories", icon: Tags },
+  { key: "coupons", label: "Coupons", icon: Tag },
 ];
 
 export default function AdminPage() {
@@ -128,6 +137,7 @@ export default function AdminPage() {
             onChanged={() => setMenuRefreshKey((k) => k + 1)}
           />
         )}
+        {tab === "coupons" && <CouponsTab onUnauthorized={onUnauthorized} />}
       </div>
     </div>
   );

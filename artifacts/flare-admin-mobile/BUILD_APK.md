@@ -19,6 +19,15 @@ Everything is already prepared in this folder. You only need a **free Expo accou
    - `login` — enter your Expo account email + password
    - `init` — press Enter to accept creating the project (this links the app to your account and adds a `projectId` to app.json — needed for push notifications)
 
+   **If `npm install` fails** (e.g. an error mentioning "catalog:" or leftover files from an earlier try), clean up and retry:
+
+   ```
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
+
+   Make sure you're using the latest downloaded copy of this folder — older versions had a package.json that only worked inside Replit.
+
 ## Enable push notifications (one-time, ~5 minutes)
 
 Push notifications on Android need a (free) Firebase project:

@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { isAdmin } from "@/lib/admin";
@@ -109,11 +110,15 @@ export async function POST(request: NextRequest) {
       created_at: string;
     }>(
       `INSERT INTO orders
-         (customer_name, customer_phone, customer_address, order_type,
+         (tracking_token, customer_name, customer_phone, customer_address, order_type,
           special_instructions, total_amount, items)
-       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
        RETURNING id, tracking_token, status, total_amount, created_at`,
       [
+        // Generated in app code — some managed Postgres setups lack a working
+        // gen_random_uuid() default (pgcrypto unavailable), which made the DB
+        // default silently absent and inserts fail with a NOT NULL violation.
+        randomUUID(),
         customerName.trim(),
         customerPhone.trim(),
         typeof customerAddress === "string" ? customerAddress.trim() : null,

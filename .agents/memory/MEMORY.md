@@ -1,2 +1,3 @@
 - [Flare-by-TK deployment model](flare-vercel.md) — flare-by-tk artifact is a standalone Next.js app targeting Vercel, not Replit publish; template api-server was moved off /api to /_shared-api.
 - [Managed Postgres UUID defaults](managed-postgres-uuid-defaults.md) — generate UUIDs in app code; gen_random_uuid() defaults can be silently absent on managed Postgres.
+- [Vercel Hobby limits](vercel-hobby-limits.md) — sub-daily crons in vercel.json fail the whole deploy; pnpm `catalog:` protocols break standalone `npm install` for EAS builds.

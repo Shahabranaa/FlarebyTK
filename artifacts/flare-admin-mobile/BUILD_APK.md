@@ -71,4 +71,4 @@ npx eas-cli build -p android --profile preview
 - The ringing notification works even when the app is closed, thanks to push notifications.
 - While the app is open, it also rings continuously on its own until every new order is accepted.
 - If you change the admin password later, just log out in the app and log back in.
-- Reminder pushes for unaccepted orders are set up via Vercel Cron (`vercel.json`). Note: on Vercel's free (Hobby) plan, cron jobs only run once per day — the instant "New Order" push always works, but repeat reminders every minute need a Vercel Pro plan.
+- Reminder pushes for unaccepted orders are set up via Vercel Cron (`vercel.json`, once per day — the maximum Vercel's free Hobby plan allows; a more frequent schedule makes the deploy fail). The instant "New Order" push always works. For repeat reminders every minute, either upgrade to Vercel Pro and change the schedule, or use a free service like cron-job.org to call `https://flarebytk.com/api/cron/remind` every minute (set a `CRON_SECRET` env var on Vercel and send it as `Authorization: Bearer <secret>`).

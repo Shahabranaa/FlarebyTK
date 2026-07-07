@@ -27,7 +27,7 @@ Restaurant website for a fast-casual restaurant in Satellite Town, Bahawalpur, P
 - `lib/whatsapp.ts` — Pakistani phone normalization, {placeholder} template fill, wa.me link builder, default message templates
 - Riders + Settings admin tabs; orders carry `pos_number` + `rider_id`; message templates stored in `settings` key/value table (defaults merged server-side)
 - Order statuses: new → accepted → preparing → ready → delivered (+cancelled)
-- Push: `device_tokens` table, `lib/push.ts` (Expo push API), POST `/api/devices` (admin) registers tokens; push fired on order create; `/api/cron/remind` re-pushes while orders are `new` (vercel.json cron every minute — Hobby plan runs crons once/day; rate-limited via `settings.last_remind_at`, auth via CRON_SECRET bearer or vercel-cron user-agent)
+- Push: `device_tokens` table, `lib/push.ts` (Expo push API), POST `/api/devices` (admin) registers tokens; push fired on order create; `/api/cron/remind` re-pushes while orders are `new` (vercel.json cron daily at 9:00 — Hobby plan rejects deploys with sub-daily cron schedules; per-minute reminders need Vercel Pro or an external cron pinging the route; rate-limited via `settings.last_remind_at`, auth via CRON_SECRET bearer or vercel-cron user-agent)
 
 ## Admin mobile app (artifacts/flare-admin-mobile)
 

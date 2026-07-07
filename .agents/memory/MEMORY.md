@@ -1,0 +1,1 @@
+- [Flare-by-TK deployment model](flare-vercel.md) — flare-by-tk artifact is a standalone Next.js app targeting Vercel, not Replit publish; template api-server was moved off /api to /_shared-api.

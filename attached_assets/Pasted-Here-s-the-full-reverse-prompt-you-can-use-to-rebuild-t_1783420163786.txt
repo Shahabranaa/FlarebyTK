@@ -1,0 +1,63 @@
+Here's the full reverse prompt you can use to rebuild this app from scratch:
+
+Prompt:
+
+Build a complete restaurant website called "Flare by TK" for a fast-casual restaurant in Bahawalpur, Pakistan. It must be a standalone Next.js 15 App Router app deployable to Vercel using only two environment variables: DATABASE_URL (Neon PostgreSQL) and ADMIN_PASSWORD. No ORM, no auth library, no Redis — just raw pg, Tailwind CSS, and Next.js.
+
+Stack:
+
+Next.js 15 (App Router, TypeScript)
+Tailwind CSS + Poppins font (via Google Fonts) + a custom heading font
+pg (node-postgres) for all DB access — no Drizzle, no Prisma
+lucide-react for icons
+No Clerk, no NextAuth, no Redis
+Database — 4 tables (auto-created on first request):
+
+categories — id, name, slug, description, image_url, sort_order, is_active, timestamps
+menu_items — id, name, slug, description, category_id (FK), price, original_price, image_url, is_available, is_featured, calories, tags (text[]), timestamps
+deals — id, title, description, image_url, original_price, deal_price, discount_type, discount_value, is_active, timestamps
+orders — id, tracking_token (UUID), customer_name, customer_phone, customer_address, order_type (delivery/pickup), status (new/preparing/ready/delivered/cancelled), total_amount, special_instructions, items (JSONB), timestamps
+The lib/db.ts file exports a sql<T>() helper that calls ensureSchema() on every query (lazy, cached in globalThis so it only runs once per process). ensureSchema() runs all four CREATE TABLE IF NOT EXISTS statements in one query.
+
+Pages:
+
+/ — Full-screen hero with food photo, left-aligned headline "FLARE BY TK." in massive text, orange accent color, two CTA buttons (Order Now scrolls to menu, View Deals links to /deals). Below the hero, embed the full <MenuSection /> component.
+/menu — Just a heading + the same <MenuSection />.
+/deals — Server component (export const dynamic = 'force-dynamic') that queries deals directly via sql() and renders a grid of deal cards with image, title, description, original price struck through, deal price in orange.
+/about — Static page with restaurant info, address (Satellite Town, Bahawalpur), phone number, opening hours.
+/cart — Client component reading cart from context, shows items with quantity controls, subtotal, delivery fee (Rs. 150), order type toggle (delivery/pickup), customer name/phone/address form, places order via POST /api/orders, redirects to /order/[trackingToken].
+/order/[token] — Client component that polls GET /api/orders/track/[token] every 5 seconds and shows a live status timeline (new → preparing → ready → delivered).
+/admin — Client component, login form that posts to POST /api/admin/login (sets admin-session httpOnly cookie = the raw ADMIN_PASSWORD). Once logged in, shows all orders in a table, lets admin update status via PATCH /api/orders/[id].
+<MenuSection /> — 'use client' component that:
+
+Fetches /api/categories, /api/menu-items?available=true, /api/deals?active=true
+Renders a sticky horizontal scroll-spy category nav bar at the top
+First section is "Most Selling" (featured items), second is "Today's Deals" cards, then one section per category
+Each menu item is a horizontal card: 110px square image on the right, name + description + price on the left, Add to Cart button
+Uses cart context (useCart()) for add/remove/quantity
+Cart context (lib/cart.tsx) — React context + localStorage persistence. Methods: add(item), setQty(id, qty), clear(). Cart items: { id, name, price, qty }.
+
+API routes:
+
+GET /api/categories — all active categories
+GET /api/menu-items?available=true&categoryId=X&featured=true — filtered items with category name joined
+GET /api/deals?active=true — active deals
+POST /api/orders — validates, looks up prices server-side, calculates total (+ Rs. 150 delivery fee), inserts order, returns { id, trackingToken, status, totalAmount, createdAt }
+GET /api/orders/track/[token] — public endpoint, returns order by tracking_token UUID
+GET /api/orders — admin only (checks cookie), returns all orders newest first
+PATCH /api/orders/[id] — admin only, updates status
+POST /api/admin/login — compares password to ADMIN_PASSWORD, sets admin-session cookie
+GET /api/setup?key=ADMIN_PASSWORD — returns row counts; POST /api/setup?key=ADMIN_PASSWORD — seeds all 10 categories, 61 menu items, 5 deals with ON CONFLICT DO UPDATE. Add ?force=true to re-seed.
+Design:
+
+Dark theme: near-black background (#0a0a0a), zinc-900 cards, zinc-800 borders
+Primary/accent color: orange (#ff6b1a)
+Sticky nav with logo left, page links center, cart icon right (shows item count badge)
+All prices in Pakistani Rupees (Rs.)
+Mobile-responsive, Tailwind utility classes throughout
+Vercel deployment:
+
+vercel.json inside the app folder: { "framework": "nextjs", "installCommand": "npm install", "buildCommand": "npm run build" }
+Set Root Directory to this folder in Vercel project settings
+Add DATABASE_URL and ADMIN_PASSWORD as environment variables in Vercel
+After first deploy, POST to /api/setup?key=ADMIN_PASSWORD to seed all data

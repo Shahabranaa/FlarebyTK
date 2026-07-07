@@ -1,45 +1,48 @@
-# [Project name]
+# Flare by TK
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Restaurant website for a fast-casual restaurant in Satellite Town, Bahawalpur, Pakistan — online menu, cart, order placement/tracking, and an admin order dashboard.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Site runs via the `artifacts/flare-by-tk: web` workflow (Next.js dev server on port 22091, previewed at `/`)
+- `pnpm --filter @workspace/flare-by-tk run typecheck` — typecheck the app
+- Seed/re-seed data: `POST /api/setup?key=<ADMIN_PASSWORD>` (add `&force=true` to overwrite)
+- Dev admin password: `admin123` (set in the artifact toml; production value is set on Vercel)
+- Required env: `DATABASE_URL` (Postgres/Neon), `ADMIN_PASSWORD`
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- **Standalone Next.js 15 App Router app** at `artifacts/flare-by-tk` — deployed by the user to **Vercel**, not Replit publish
+- Raw `pg` (no ORM), Tailwind CSS v4, lucide-react, Poppins + Bebas Neue fonts
+- No auth libraries — admin auth is an HMAC-derived httpOnly cookie from `ADMIN_PASSWORD`
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `lib/db.ts` — `sql<T>()` helper + lazy schema bootstrap (CREATE TABLE IF NOT EXISTS, cached in globalThis)
+- `lib/seed.ts` — seed data (10 categories, 61 menu items, 5 deals)
+- `lib/cart.tsx` — cart context (localStorage key `flare-cart`)
+- `lib/admin.ts` — admin session token helpers
+- `app/api/*` — REST routes (categories, menu-items, deals, orders, orders/track/[token], orders/[id], admin/login, setup)
+- `components/MenuSection.tsx` — main menu UI with scroll-spy category nav
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Schema is auto-created on first DB access (no migration step) so Vercel deploys need zero setup beyond env vars
+- Order totals are computed server-side from DB prices (Rs. 150 delivery fee); client-sent prices are ignored
+- Tracking is by unguessable UUID token — no customer accounts
+- The template `api-server` artifact was moved from `/api` to `/_shared-api` so Next's API routes work in the Replit preview
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Home page with hero + full menu (Most Selling, Today's Deals, per-category sections)
+- /menu, /deals, /about, /cart (delivery/pickup toggle), /order/[token] (live status polling), /admin (order dashboard)
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Deploys to **Vercel** (Root Directory `artifacts/flare-by-tk`), NOT Replit — only `DATABASE_URL` + `ADMIN_PASSWORD` env vars
+- Follow the reverse-prompt spec in `attached_assets/` exactly
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- Don't remove the `[[integratedSkills]]` block from the flare artifact.toml — toml validation rejects that
+- Prices are `NUMERIC` — Postgres returns them as strings; convert with `Number()` before math
